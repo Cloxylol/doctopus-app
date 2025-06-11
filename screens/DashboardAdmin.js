@@ -21,6 +21,8 @@ export default function DashboardAdmin({ navigation }) {
           'Authorization': `Bearer ${token}`
         }
       });
+      const data = await response.json(); 
+      setMedecins(data); 
     } catch (error) {
       console.error('Erreur de chargement :', error);
       Alert.alert('Erreur', 'Impossible de charger les médecins');
