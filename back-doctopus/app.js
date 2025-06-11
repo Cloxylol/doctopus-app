@@ -5,6 +5,8 @@ const patientRoutes = require('./routes/patientRoutes');
 const medecinRoutes = require('./routes/medecinRoutes');
 const medicamentRoutes = require('./routes/medicamentRoutes');
 const authRoutes = require('./routes/authRoutes');
+const rdvRoutes = require('./routes/rdvRoutes');
+
 
 
 const app = express();
@@ -30,6 +32,8 @@ app.use('/patients', patientRoutes);
 app.use('/medecins', medecinRoutes);
 app.use('/medicaments', medicamentRoutes);
 app.use('/auth', authRoutes);
+app.use('/rdv', rdvRoutes);
+
 
 
 // Démarrage
