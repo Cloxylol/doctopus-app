@@ -1,15 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (email === 'rh@hopital.fr') navigation.navigate('RH');
-    else if (email === 'medecin@hopital.fr') navigation.navigate('Médecin');
-    else if (email === 'admin@hopital.fr') navigation.navigate('Admin');
-    else alert("Utilisateur inconnu");
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://192.168.1.191:3000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, motDePasse: password })
+      });
+
+      const data = await response.json();
+      console.log('Réponse API :', data);
+
+      if (response.ok && data.user && data.token) {
+  const role = data.user.role.toLowerCase();
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('role', role);
+
+      if (role === 'rh') navigation.navigate('RH');
+      else if (role === 'medecin') navigation.navigate('Médecin');
+      else if (role === 'admin') navigation.navigate('Admin');
+      else Alert.alert('Erreur', 'Rôle inconnu');
+    } else {
+        Alert.alert('Erreur', data.error || 'Identifiants incorrects');
+      }
+    } catch (error) {
+      console.error('Erreur réseau ou JSON :', error);
+      Alert.alert('Erreur', 'Impossible de se connecter au serveur');
+    }
   };
 
   return (
@@ -19,12 +44,14 @@ export default function LoginScreen({ navigation }) {
         style={styles.input}
         placeholder="Email"
         onChangeText={setEmail}
+        value={email}
       />
       <TextInput
         style={styles.input}
         placeholder="Mot de passe"
         secureTextEntry
         onChangeText={setPassword}
+        value={password}
       />
       <Button title="Se connecter" onPress={handleLogin} />
     </View>
