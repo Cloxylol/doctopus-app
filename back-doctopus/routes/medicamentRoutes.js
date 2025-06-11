@@ -5,6 +5,6 @@ const { verifyToken, requireRole } = require('../middleware/authMiddleware');
 
 
 router.get('/', verifyToken, controller.getMedicaments);
-router.post('/', verifyToken, controller.createMedicament);
+router.post('/', verifyToken, requireRole('MEDECIN'),  controller.createMedicament);
 
 module.exports = router;

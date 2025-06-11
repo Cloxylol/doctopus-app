@@ -29,3 +29,21 @@ exports.addPatientToMedecin = async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 };
+
+exports.getMedecinById = async (req, res) => {
+    const medecin = await Medecin.findById(req.params.id).populate('patients');
+    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+    res.json(medecin);
+};
+
+exports.updateMedecin = async (req, res) => {
+    const medecin = await Medecin.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+    res.json({ message: 'Médecin mis à jour', medecin });
+};
+
+exports.deleteMedecin = async (req, res) => {
+    const medecin = await Medecin.findByIdAndDelete(req.params.id);
+    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+    res.json({ message: 'Médecin supprimé' });
+};

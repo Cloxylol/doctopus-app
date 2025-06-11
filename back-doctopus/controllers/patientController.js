@@ -30,3 +30,22 @@ exports.addMedicamentToPatient = async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 };
+
+exports.getPatientById = async (req, res) => {
+    const patient = await Patient.findById(req.params.id).populate('medicaments');
+    if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
+    res.json(patient);
+};
+
+exports.updatePatient = async (req, res) => {
+    const patient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
+    res.json({ message: 'Patient mis à jour', patient });
+};
+
+exports.deletePatient = async (req, res) => {
+    const patient = await Patient.findByIdAndDelete(req.params.id);
+    if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
+    res.json({ message: 'Patient supprimé' });
+};
+
