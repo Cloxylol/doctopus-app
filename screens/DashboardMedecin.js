@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { API_URL } from '../config';
+
 
 export default function DashboardMedecin() {
   return (
