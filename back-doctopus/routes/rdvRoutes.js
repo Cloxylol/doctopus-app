@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/rendezVousController');
+const controller = require('../controllers/rdvController');
 const { verifyToken, requireRole } = require('../middleware/authMiddleware');
 
 // Création (MEDECIN)
