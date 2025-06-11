@@ -1,13 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_URL } from '../config';
+
 
 export default function DashboardRHAdmin({ navigation }) {
   const [rhUsers, setRhUsers] = useState([]);
 
   const fetchRH = async () => {
     try {
-      const response = await fetch('http://192.168.1.191:3000/users');
+      const response = await fetch('${API_URL}/users');
       const data = await response.json();
       const onlyRH = data.filter(user => user.role === 'RH');
       setRhUsers(onlyRH);

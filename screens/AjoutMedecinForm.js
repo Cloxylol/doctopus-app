@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { API_URL } from '../config';
+
 
 export default function AjoutMedecinForm({ navigation }) {
   const [nom, setNom] = useState('');
@@ -12,7 +14,7 @@ export default function AjoutMedecinForm({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://192.168.1.191:3000/medecins', {
+      const response = await fetch('${API_URL}/medecins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nom, specialite, email })

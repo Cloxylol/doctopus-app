@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { API_URL } from '../config';
+
 
 
 
@@ -12,7 +14,7 @@ export default function DashboardAdmin({ navigation }) {
   const fetchMedecins = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.1.191:3000/medecins');
+      const response = await fetch('${API_URL}/medecins');
       const data = await response.json();
       setMedecins(data);
     } catch (error) {
@@ -24,7 +26,7 @@ export default function DashboardAdmin({ navigation }) {
 
   const deleteMedecin = async (id) => {
     try {
-      await fetch(`http://192.168.1.191:3000/medecins/${id}`, {
+      await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
       });
       fetchMedecins();

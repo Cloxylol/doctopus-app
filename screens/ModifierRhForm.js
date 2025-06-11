@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { API_URL } from '../config';
+
 
 export default function ModifierRhForm({ route, navigation }) {
   const { rh } = route.params;
@@ -9,7 +11,7 @@ export default function ModifierRhForm({ route, navigation }) {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`http://192.168.1.191:3000/users/${rh._id}`, {
+      const response = await fetch(`${API_URL}/users/${rh._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
