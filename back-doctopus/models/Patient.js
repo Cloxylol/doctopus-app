@@ -6,7 +6,7 @@ const patientSchema = new mongoose.Schema({
     age: Number,
     poids: Number,
     taille: Number,
-    traitement: String,
+    medicaments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Medicament' }]
 });
 
 module.exports = mongoose.model('Patient', patientSchema);
