@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { API_URL } from '../config';
 
@@ -11,9 +12,13 @@ export default function ModifierRhForm({ route, navigation }) {
 
   const handleUpdate = async () => {
     try {
+      const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${API_URL}/users/${rh._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           email,
           ...(motDePasse ? { motDePasse } : {})

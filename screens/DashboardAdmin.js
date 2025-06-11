@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
@@ -14,9 +15,12 @@ export default function DashboardAdmin({ navigation }) {
   const fetchMedecins = async () => {
     setLoading(true);
     try {
-      const response = await fetch('${API_URL}/medecins');
-      const data = await response.json();
-      setMedecins(data);
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${API_URL}/medecins`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
     } catch (error) {
       console.error('Erreur de chargement :', error);
       Alert.alert('Erreur', 'Impossible de charger les médecins');
@@ -26,8 +30,12 @@ export default function DashboardAdmin({ navigation }) {
 
   const deleteMedecin = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, {
+      const token = await AsyncStorage.getItem('token');
+      await fetch(`${API_URL}/medecins/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       fetchMedecins();
     } catch (error) {
@@ -36,10 +44,10 @@ export default function DashboardAdmin({ navigation }) {
   };
 
   useFocusEffect(
-  useCallback(() => {
-    fetchMedecins();
-  }, [])
-);
+    useCallback(() => {
+      fetchMedecins();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -55,8 +63,8 @@ export default function DashboardAdmin({ navigation }) {
             <View style={styles.card}>
               <Text style={styles.nom}>{item.nom} ({item.specialite})</Text>
               <Text style={styles.email}>{item.email}</Text>
-              <Button title="Supprimer" onPress={() => deleteMedecin(item._id)}/>
-              <Button title="Modifier" onPress={() => navigation.navigate('ModifierMedecin', { medecin: item })}/>
+              <Button title="Supprimer" onPress={() => deleteMedecin(item._id)} />
+              <Button title="Modifier" onPress={() => navigation.navigate('ModifierMedecin', { medecin: item })} />
 
             </View>
           )}
@@ -64,7 +72,7 @@ export default function DashboardAdmin({ navigation }) {
       )}
 
       <Button title="Ajouter un médecin" onPress={() => navigation.navigate('AjouterMedecin')}
-/>
+      />
 
     </View>
   );
