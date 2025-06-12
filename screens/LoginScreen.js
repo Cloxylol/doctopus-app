@@ -20,16 +20,14 @@ export default function LoginScreen({ navigation }) {
       const data = await response.json();
       console.log('Réponse API :', data);
 
-      if (response.ok && data.user && data.token) {
-  const role = data.user.role.toLowerCase();
+     if (response.ok && data.user && data.token) {
+      const role = data.user.role.toLowerCase();
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('role', role);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
-      if (role === 'rh') navigation.navigate('RH');
-      else if (role === 'medecin') navigation.navigate('Médecin');
-      else if (role === 'admin') navigation.navigate('Admin');
-      else Alert.alert('Erreur', 'Rôle inconnu');
+      navigation.navigate('Accueil', { role: data.user.role });
     } else {
         Alert.alert('Erreur', data.error || 'Identifiants incorrects');
       }

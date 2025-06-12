@@ -15,7 +15,7 @@ export default function AjouterRhForm({ navigation }) {
 
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('${API_URL}/auth/register', {
+      const response = await fetch(`${API_URL}/rh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
