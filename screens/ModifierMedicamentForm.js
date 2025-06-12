@@ -8,6 +8,8 @@ export default function ModifierMedicamentForm({ route, navigation }) {
 
   const [nom, setNom] = useState(medicament.nom);
   const [posologie, setPosologie] = useState(medicament.posologie);
+  const [description, setDescription] = useState(medicament.description);
+
 
   const handleUpdate = async () => {
     if (!nom || !posologie) {
@@ -22,7 +24,7 @@ export default function ModifierMedicamentForm({ route, navigation }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ nom, posologie })
+        body: JSON.stringify({ nom, posologie, description })
       });
 
       if (response.ok) {
@@ -47,6 +49,13 @@ export default function ModifierMedicamentForm({ route, navigation }) {
         placeholder="Nom"
         value={nom}
         onChangeText={setNom}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description"
+        value={description}
+        onChangeText={setDescription}
+        multiline
       />
       <TextInput
         style={styles.input}

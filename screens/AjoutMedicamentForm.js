@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { API_URL } from '../config';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
 
 export default function AjoutMedicamentForm({ navigation }) {
   const [nom, setNom] = useState('');
   const [description, setDescription] = useState('');
+  const [posologie, setPosologie] = useState('');
+  const [photoBase64, setPhotoBase64] = useState(null);
+
 
   const handleSubmit = async () => {
     if (!nom || !description) {
@@ -21,7 +26,7 @@ export default function AjoutMedicamentForm({ navigation }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ nom, description })
+        body: JSON.stringify({ nom, description, posologie, photoBase64 })
       });
 
       if (response.ok) {
@@ -36,6 +41,29 @@ export default function AjoutMedicamentForm({ navigation }) {
       Alert.alert('Erreur réseau', 'Impossible de contacter le serveur');
     }
   };
+
+  const [image, setImage] = useState(null);
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (permissionResult.granted === false) {
+      return Alert.alert("Permission refusée", "Autorisation caméra requise.");
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const asset = result.assets[0];
+      setImage(asset.uri);
+      setPhotoBase64(`data:image/jpeg;base64,${asset.base64}`);
+    }
+  };
+
+
 
   return (
     <View style={styles.container}>
@@ -54,6 +82,16 @@ export default function AjoutMedicamentForm({ navigation }) {
         onChangeText={setDescription}
         multiline
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Posologie"
+        value={posologie}
+        onChangeText={setPosologie}
+      />
+
+      <Button title="Prendre une photo" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={{ width: 100, height: 100, alignContent: 'center' }} resizeMode="contain" />}
+
       <Button title="Ajouter" onPress={handleSubmit} />
     </View>
   );
