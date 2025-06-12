@@ -11,7 +11,7 @@ import ModifierMedecinForm from './screens/ModifierMedecinForm';
 import DashboardAdminRh from './screens/DashboardAdminRh';
 import AjoutRhForm from './screens/AjoutRhForm';
 import ModifierRhForm from './screens/ModifierRhForm';
-import DashboardRh from './screens/DashboardRh';
+import DashboardRh from './screens/DashboardRH';
 import AjoutPatientForm from './screens/AjoutPatientForm';
 import ModifierPatientForm from './screens/ModifierPatientForm';
 import DashboardMedecin from './screens/DashboardMedecin';
@@ -41,7 +41,7 @@ export default function App() {
         <Stack.Screen name="Rh" component={DashboardRh} />
         <Stack.Screen name="AjouterPatient" component={AjoutPatientForm} />
         <Stack.Screen name="ModifierPatient" component={ModifierPatientForm} />
-        <Stack.Screen name="Médecin" component={DashboardMedecin} />
+        <Stack.Screen name="Medecin" component={DashboardMedecin} />
         <Stack.Screen name="ListeMedicaments" component={ListeMedicamentsScreen} />
         <Stack.Screen name="AjouterMedicament" component={AjoutMedicamentForm} />
         <Stack.Screen name="ModifierMedicament" component={ModifierMedicamentForm} />
