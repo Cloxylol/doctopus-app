@@ -1,5 +1,8 @@
 const Medecin = require('../models/Medecin');
 const Patient = require('../models/Patient');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+
 
 
 exports.getMedecins = async (req, res) => {
@@ -8,9 +11,46 @@ exports.getMedecins = async (req, res) => {
 };
 
 exports.createMedecin = async (req, res) => {
-    const medecin = new Medecin(req.body);
+  try {
+    const { nom, specialite, email, motDePasse } = req.body;
+
+    if (!email || !motDePasse) {
+      return res.status(400).json({ error: 'Email et mot de passe requis' });
+    }
+
+    // Vérifier si l'email est déjà utilisé
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email déjà utilisé' });
+    }
+
+    // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(motDePasse, 10);
+
+    // Création du User
+    const user = new User({
+      email,
+      motDePasse: hashedPassword,
+      role: 'MEDECIN'
+    });
+
+    await user.save();
+
+    // Création du Médecin lié au User
+    const medecin = new Medecin({
+      nom,
+      specialite,
+      email,
+      user: user._id
+    });
+
     await medecin.save();
-    res.status(201).json({ message: 'Médecin ajouté', medecin });
+
+    res.status(201).json({ message: 'Médecin et utilisateur créés', medecin });
+  } catch (error) {
+    console.error('Erreur création médecin :', error);
+    res.status(500).json({ error: 'Erreur lors de la création du médecin' });
+  }
 };
 
 exports.addPatientToMedecin = async (req, res) => {
@@ -46,4 +86,21 @@ exports.deleteMedecin = async (req, res) => {
     const medecin = await Medecin.findByIdAndDelete(req.params.id);
     if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
     res.json({ message: 'Médecin supprimé' });
+};
+
+exports.getMedecinByUserId = async (req, res) => {
+  try {
+    const medecin = await Medecin.findOne({ user: req.user.id })
+      .populate({
+        path: 'patients',
+        populate: { path: 'medicaments' }
+      });
+
+    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+
+    res.json(medecin);
+  } catch (err) {
+    console.error('Erreur récupération médecin :', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 };

@@ -6,6 +6,7 @@ const medecinRoutes = require('./routes/medecinRoutes');
 const medicamentRoutes = require('./routes/medicamentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const rdvRoutes = require('./routes/rdvRoutes');
+const rhRoutes = require('./routes/RhRoutes');
 
 
 
@@ -33,6 +34,7 @@ app.use('/medecins', medecinRoutes);
 app.use('/medicaments', medicamentRoutes);
 app.use('/auth', authRoutes);
 app.use('/rdv', rdvRoutes);
+app.use('/rh', rhRoutes);
 
 
 
