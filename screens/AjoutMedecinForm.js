@@ -3,14 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { API_URL } from '../config';
 
-
 export default function AjoutMedecinForm({ navigation }) {
   const [nom, setNom] = useState('');
   const [specialite, setSpecialite] = useState('');
   const [email, setEmail] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
 
   const handleSubmit = async () => {
-    if (!nom || !specialite || !email) {
+    if (!nom || !specialite || !email || !motDePasse) {
       return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
     }
 
@@ -22,15 +22,15 @@ export default function AjoutMedecinForm({ navigation }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ nom, specialite, email })
+        body: JSON.stringify({ nom, specialite, email, motDePasse })
       });
 
       if (response.ok) {
         Alert.alert('Succès', 'Médecin ajouté');
-        navigation.goBack(); // retour au dashboard
+        navigation.goBack();
       } else {
-        Alert.alert('Erreur', 'Échec de l’ajout');
-        console.log(await response.text());
+        const msg = await response.text();
+        Alert.alert('Erreur', msg);
       }
     } catch (error) {
       console.error(error);
@@ -59,6 +59,14 @@ export default function AjoutMedecinForm({ navigation }) {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Mot de passe"
+        value={motDePasse}
+        onChangeText={setMotDePasse}
+        secureTextEntry
       />
       <Button title="Enregistrer" onPress={handleSubmit} />
     </View>

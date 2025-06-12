@@ -3,58 +3,58 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { API_URL } from '../config';
 
+export default function ModifierMedicamentForm({ route, navigation }) {
+  const { medicament } = route.params;
 
-export default function ModifierRhForm({ route, navigation }) {
-  const { rh } = route.params;
-
-  const [email, setEmail] = useState(rh.email);
-  const [motDePasse, setMotDePasse] = useState('');
+  const [nom, setNom] = useState(medicament.nom);
+  const [posologie, setPosologie] = useState(medicament.posologie);
 
   const handleUpdate = async () => {
+    if (!nom || !posologie) {
+      return Alert.alert('Erreur', 'Tous les champs sont requis');
+    }
+
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${API_URL}/rh/${rh._id}`, {
+      const response = await fetch(`${API_URL}/medicaments/${medicament._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          email,
-          ...(motDePasse ? { motDePasse } : {})
-        })
+        body: JSON.stringify({ nom, posologie })
       });
 
       if (response.ok) {
-        Alert.alert('Succès', 'RH modifié');
+        Alert.alert('Succès', 'Médicament modifié');
         navigation.goBack();
       } else {
         const msg = await response.text();
         Alert.alert('Erreur', msg);
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Erreur réseau', 'Connexion impossible au serveur');
+    } catch (err) {
+      console.error('Erreur modification :', err);
+      Alert.alert('Erreur réseau', 'Impossible de contacter le serveur');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modifier un RH</Text>
+      <Text style={styles.title}>Modifier un médicament</Text>
+
       <TextInput
         style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
+        placeholder="Nom"
+        value={nom}
+        onChangeText={setNom}
       />
       <TextInput
         style={styles.input}
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-        placeholder="Nouveau mot de passe (facultatif)"
-        secureTextEntry
+        placeholder="Posologie"
+        value={posologie}
+        onChangeText={setPosologie}
       />
-      <Button title="Enregistrer les modifications" onPress={handleUpdate} />
+      <Button title="Modifier" onPress={handleUpdate} />
     </View>
   );
 }
