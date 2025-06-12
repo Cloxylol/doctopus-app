@@ -16,7 +16,9 @@ exports.verifyToken = (req, res, next) => {
 
 exports.requireRole = (role) => {
     return (req, res, next) => {
-        if (req.user.role !== role) return res.status(403).json({ error: 'Accès refusé' });
+        if (!req.user || (req.user.role !== role && req.user.role !== 'ADMIN')) {
+            return res.status(403).json({ error: 'Accès refusé' });
+        }
         next();
     };
 };

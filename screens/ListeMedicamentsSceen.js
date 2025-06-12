@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Button, Alert, Image,  StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,6 +62,15 @@ export default function ListeMedicamentsScreen({ navigation }) {
           <View style={styles.card}>
             <Text style={styles.nom}>{item.nom}</Text>
             <Text style={styles.desc}>{item.description}</Text>
+            {item.photoBase64 && (
+              <Image
+                source={{ uri: item.photoBase64 }}
+                style={{ width: 100, height: 100 }}
+                resizeMode="contain"
+              />
+            )}
+
+
             <Button
               title="Modifier"
               onPress={() => navigation.navigate('ModifierMedicament', { medicament: item })}
