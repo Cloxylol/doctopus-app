@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, Button, Alert, StyleSheet, TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 
 export default function DashboardRH({ navigation }) {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchPatients = async () => {
     setLoading(true);
@@ -48,15 +48,26 @@ export default function DashboardRH({ navigation }) {
     fetchPatients();
   }, []));
 
+  const filteredPatients = patients.filter((p) =>
+    `${p.nom} ${p.prenom}`.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gestion des Patients</Text>
+
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Rechercher un patient..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
 
       {loading ? (
         <Text>Chargement...</Text>
       ) : (
         <FlatList
-          data={patients}
+          data={filteredPatients}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -91,6 +102,13 @@ export default function DashboardRH({ navigation }) {
 const styles = StyleSheet.create({
   container: { padding: 20, flex: 1 },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  searchBar: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10
+  },
   card: {
     marginBottom: 15,
     padding: 10,
