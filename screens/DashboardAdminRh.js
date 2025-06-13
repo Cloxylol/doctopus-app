@@ -1,25 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, Button, Alert, StyleSheet, TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 
 export default function DashboardAdminRh({ navigation }) {
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchRH = async () => {
-    
     try {
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${API_URL}/rh`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       const data = await response.json();
-      
       const rhUsers = data.filter((user) => user.role === 'RH');
       setUsers(rhUsers);
     } catch (error) {
@@ -33,9 +29,7 @@ export default function DashboardAdminRh({ navigation }) {
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${API_URL}/rh/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.ok) {
@@ -55,12 +49,23 @@ export default function DashboardAdminRh({ navigation }) {
     }, [])
   );
 
+  const filteredUsers = users.filter((u) =>
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gestion des RH</Text>
 
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Rechercher par email..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       <FlatList
-        data={users}
+        data={filteredUsers}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -71,7 +76,12 @@ export default function DashboardAdminRh({ navigation }) {
             />
             <Button
               title="Supprimer"
-              onPress={() => deleteUser(item._id)}
+              onPress={() =>
+                Alert.alert('Confirmation', 'Supprimer ce RH ?', [
+                  { text: 'Annuler' },
+                  { text: 'Confirmer', onPress: () => deleteUser(item._id) }
+                ])
+              }
             />
           </View>
         )}
@@ -85,6 +95,13 @@ export default function DashboardAdminRh({ navigation }) {
 const styles = StyleSheet.create({
   container: { padding: 20, flex: 1 },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  searchBar: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10
+  },
   card: {
     marginBottom: 15,
     padding: 10,

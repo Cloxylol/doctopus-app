@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, Alert, Image,  StyleSheet } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, Button, Alert, Image, StyleSheet, TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 
 export default function ListeMedicamentsScreen({ navigation }) {
   const [medicaments, setMedicaments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchMedicaments = async () => {
     try {
@@ -51,12 +51,23 @@ export default function ListeMedicamentsScreen({ navigation }) {
     }, [])
   );
 
+  const filteredMedicaments = medicaments.filter(m =>
+    m.nom.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Liste des Médicaments</Text>
 
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Rechercher un médicament..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
       <FlatList
-        data={medicaments}
+        data={filteredMedicaments}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -69,8 +80,6 @@ export default function ListeMedicamentsScreen({ navigation }) {
                 resizeMode="contain"
               />
             )}
-
-
             <Button
               title="Modifier"
               onPress={() => navigation.navigate('ModifierMedicament', { medicament: item })}
@@ -91,6 +100,13 @@ export default function ListeMedicamentsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { padding: 20, flex: 1 },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  searchBar: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10
+  },
   card: { marginBottom: 15, padding: 10, backgroundColor: '#eee', borderRadius: 6 },
   nom: { fontWeight: 'bold' },
   desc: { fontStyle: 'italic', color: '#444' },
