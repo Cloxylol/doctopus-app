@@ -19,6 +19,7 @@ import ListeMedicamentsScreen from './screens/ListeMedicamentsSceen';
 import AjoutMedicamentForm from './screens/AjoutMedicamentForm';
 import ModifierMedicamentForm from './screens/ModifierMedicamentForm';
 import MesPatientsScreen from './screens/MesPatientsScreen';
+import AjoutRdvScreen from './screens/AjoutRdvScreen';
 
 
 
@@ -43,9 +44,10 @@ export default function App() {
         <Stack.Screen name="ModifierPatient" component={ModifierPatientForm} />
         <Stack.Screen name="Medecin" component={DashboardMedecin} />
         <Stack.Screen name="ListeMedicaments" component={ListeMedicamentsScreen} />
-        <Stack.Screen name="AjouterMedicament" component={AjoutMedicamentForm} />
+        <Stack.Screen name="AjoutMedicament" component={AjoutMedicamentForm} />
         <Stack.Screen name="ModifierMedicament" component={ModifierMedicamentForm} />
         <Stack.Screen name="MesPatients" component={MesPatientsScreen} />
+        <Stack.Screen name="AjoutRdv" component={AjoutRdvScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

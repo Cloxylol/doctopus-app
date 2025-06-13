@@ -49,7 +49,7 @@ export default function MesPatientsScreen({ navigation }) {
 
       <View style={styles.actions}>
         <Button title="Modifier traitement" onPress={() => navigation.navigate('ModifierPatient', { patient: item })} />
-        <Button title="Prendre RDV" onPress={() => navigation.navigate('AjoutRdv', { patientId: item._id })} />
+        <Button title="Prendre RDV" onPress={() => navigation.navigate('AjoutRdv', { patient: item })} />
       </View>
     </View>
   );
