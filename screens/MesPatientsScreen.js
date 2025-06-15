@@ -3,11 +3,18 @@ import { View, Text, Button, FlatList, StyleSheet, Alert, TextInput } from 'reac
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { useIsFocused } from '@react-navigation/native';
+import ModalModifierTraitement from './ModalModifierTraitement';
+
 
 export default function MesPatientsScreen({ navigation }) {
   const [patients, setPatients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const isFocused = useIsFocused();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+
 
   useEffect(() => {
     if (isFocused) fetchPatients();
@@ -52,7 +59,13 @@ export default function MesPatientsScreen({ navigation }) {
       )}
 
       <View style={styles.actions}>
-        <Button title="Modifier traitement" onPress={() => navigation.navigate('ModifierPatient', { patient: item })} />
+        <Button
+          title="Modifier traitement"
+          onPress={() => {
+            setSelectedPatient(item);
+            setModalVisible(true);
+          }}
+        />
         <Button title="Prendre RDV" onPress={() => navigation.navigate('AjoutRdv', { patient: item })} />
       </View>
     </View>
@@ -71,9 +84,23 @@ export default function MesPatientsScreen({ navigation }) {
 
       <FlatList
         data={filteredPatients}
+        key={refreshKey} 
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
       />
+
+      <ModalModifierTraitement
+        visible={modalVisible}
+        patient={selectedPatient}
+        onClose={() => setModalVisible(false)}
+        navigation={navigation}
+        onTraitementModifie={() => {
+          fetchPatients();
+          setRefreshKey(prev => prev + 1);
+          setModalVisible(false);
+        }}
+      />
+
     </View>
   );
 }

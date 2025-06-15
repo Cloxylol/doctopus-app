@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require('../controllers/medecinController');
 const { verifyToken, requireRole } = require('../middleware/authMiddleware');
 
-router.get('/me', verifyToken, requireRole('MEDECIN'), controller.getMedecinByUserId);
+router.get('/me', verifyToken, requireRole('MEDECIN'), controller.getPatientsByUserId);
 
 router.get('/', verifyToken, controller.getMedecins);
 router.post('/', verifyToken, requireRole('ADMIN'), controller.createMedecin);

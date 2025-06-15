@@ -80,7 +80,7 @@ export default function DashboardAdminMedecin({ navigation }) {
             <View style={styles.card}>
               <Text style={styles.nom}>{item.nom} ({item.specialite})</Text>
               <Text style={styles.email}>{item.email}</Text>
-              <Button title="Modifier" onPress={() => navigation.navigate('ModifierMedecin', { medecin: item })} />
+              <Button title="Modifier" onPress={() => navigation.navigate('MedicamentForm', { medecin: item })} />
               <Button title="Supprimer" onPress={() => deleteMedecin(item._id)} />
             </View>
           )}

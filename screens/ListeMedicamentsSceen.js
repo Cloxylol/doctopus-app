@@ -82,7 +82,7 @@ export default function ListeMedicamentsScreen({ navigation }) {
             )}
             <Button
               title="Modifier"
-              onPress={() => navigation.navigate('ModifierMedicament', { medicament: item })}
+              onPress={() => navigation.navigate('MedicamentForm', { medicament: item })}
             />
             <Button
               title="Supprimer"
@@ -92,7 +92,7 @@ export default function ListeMedicamentsScreen({ navigation }) {
         )}
       />
 
-      <Button title="Ajouter un médicament" onPress={() => navigation.navigate('AjouterMedicament')} />
+      <Button title="Ajouter un médicament" onPress={() => navigation.navigate('MedicamentForm')} />
     </View>
   );
 }

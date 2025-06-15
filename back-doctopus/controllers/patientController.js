@@ -1,6 +1,9 @@
 const Patient = require('../models/Patient');
 const Medicament = require('../models/Medicament');
+const mongoose = require('mongoose');
 const Medecin = require('../models/Medecin');
+const { sendEmail } = require('../utils/emailService');
+
 
 // GET /patients
 exports.getPatients = async (req, res) => {
@@ -22,7 +25,8 @@ exports.createPatient = async (req, res) => {
       poids,
       taille,
       medicaments, // tableau d’IDs (correspond au modèle)
-      medecinId
+      medecinId,
+      email
     } = req.body;
 
     const patient = new Patient({
@@ -31,7 +35,8 @@ exports.createPatient = async (req, res) => {
       age,
       poids,
       taille,
-      medicaments
+      medicaments,
+      email
     });
 
     await patient.save();
@@ -74,18 +79,33 @@ exports.updatePatient = async (req, res) => {
     if (userRole === 'RH') {
       const { nom, prenom, age, poids, taille } = req.body;
       Object.assign(updateData, { nom, prenom, age, poids, taille });
-    } else if (userRole === 'MEDECIN') {
+    } else if (userRole === 'MEDECIN' || userRole === 'ADMIN') {
       const { medicaments } = req.body;
       if (!Array.isArray(medicaments)) {
         return res.status(400).json({ error: 'Le champ medicaments doit être un tableau' });
       }
-      updateData.medicaments = medicaments;
+      updateData.medicaments = medicaments.map(id => new mongoose.Types.ObjectId(id));
     } else {
       return res.status(403).json({ error: 'Accès interdit' });
     }
 
-    const patient = await Patient.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const patient = await Patient.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate('medicaments');
+    
     if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
+
+    // Envoi d'email
+    if (userRole !== 'RH' && patient.email) {
+      const medList = patient.medicaments.map(m => `• ${m.nom}`).join('<br>');
+      await sendEmail(
+        patient.email,
+        'Changement de traitement',
+        `<p>Bonjour ${patient.prenom},</p><p>Votre médecin a mis à jour votre traitement. Voici les nouveaux médicaments prescrits :</p><p>${medList}</p><p>Cordialement,<br>L'équipe Doctopus</p>`
+      );
+    }
 
     res.json({ message: 'Patient mis à jour', patient });
   } catch (err) {

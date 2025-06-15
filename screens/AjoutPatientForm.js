@@ -11,6 +11,7 @@ export default function AjoutPatientForm({ navigation }) {
   const [poids, setPoids] = useState('');
   const [taille, setTaille] = useState('');
   const [medecinId, setMedecinId] = useState('');
+  const [email, setEmail] = useState('');
   const [medicaments, setMedicaments] = useState([]);
   const [selectedMedicaments, setSelectedMedicaments] = useState([]);
   const [medecins, setMedecins] = useState([]);
@@ -46,11 +47,14 @@ export default function AjoutPatientForm({ navigation }) {
   };
 
   const handleSubmit = async () => {
-    if (!nom || !prenom || !age || !poids || !taille || !medecinId) {
+    if (!nom || !prenom || !age || !poids || !taille || !medecinId || !email) {
       return Alert.alert('Erreur', 'Veuillez remplir tous les champs requis');
     }
 
     try {
+      console.log('Données soumises :', {
+        nom,email, prenom, age, poids, taille, medicaments: selectedMedicaments, medecinId
+      });
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${API_URL}/patients`, {
         method: 'POST',
@@ -61,11 +65,12 @@ export default function AjoutPatientForm({ navigation }) {
         body: JSON.stringify({
           nom,
           prenom,
+          email,
           age: parseInt(age),
           poids: parseFloat(poids),
           taille: parseFloat(taille),
           medicaments: selectedMedicaments,
-          medecinId
+          medecinId, 
         })
       });
 
@@ -91,6 +96,7 @@ export default function AjoutPatientForm({ navigation }) {
       <TextInput style={styles.input} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
       <TextInput style={styles.input} placeholder="Poids (kg)" value={poids} onChangeText={setPoids} keyboardType="numeric" />
       <TextInput style={styles.input} placeholder="Taille (cm)" value={taille} onChangeText={setTaille} keyboardType="numeric" />
+      <TextInput style={styles.input}  placeholder="Email" value={email} onChangeText={setEmail} />
 
       <Text style={styles.label}>Médecin référent :</Text>
       <Picker selectedValue={medecinId} onValueChange={setMedecinId} style={styles.input}>

@@ -13,6 +13,7 @@ export default function ModifierPatientForm({ route, navigation }) {
   const [poids, setPoids] = useState(String(patient.poids));
   const [taille, setTaille] = useState(String(patient.taille));
   const [medicaments, setMedicaments] = useState(patient.medicaments || []);
+  const [email, setEmail] = useState(patient.email || '');
   const [listeMedicaments, setListeMedicaments] = useState([]);
   const [role, setRole] = useState(null);
 
@@ -47,6 +48,7 @@ export default function ModifierPatientForm({ route, navigation }) {
         : {
             nom,
             prenom,
+            email,
             age: parseInt(age),
             poids: parseFloat(poids),
             taille: parseFloat(taille)
@@ -86,53 +88,14 @@ export default function ModifierPatientForm({ route, navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Modifier un Patient</Text>
 
-      {role === 'RH' && (
         <>
           <TextInput style={styles.input} value={nom} onChangeText={setNom} placeholder="Nom" />
           <TextInput style={styles.input} value={prenom} onChangeText={setPrenom} placeholder="Prénom" />
           <TextInput style={styles.input} value={age} onChangeText={setAge} placeholder="Âge" keyboardType="numeric" />
           <TextInput style={styles.input} value={poids} onChangeText={setPoids} placeholder="Poids (kg)" keyboardType="numeric" />
           <TextInput style={styles.input} value={taille} onChangeText={setTaille} placeholder="Taille (cm)" keyboardType="numeric" />
+          <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" />
         </>
-      )}
-
-      {role === 'MEDECIN' && (
-        <>
-          <Text style={styles.label}>Ajouter un médicament</Text>
-          <Picker
-            selectedValue={null}
-            onValueChange={(value) => {
-              if (value && !medicaments.includes(value)) {
-                setMedicaments([...medicaments, value]);
-              }
-            }}
-            style={styles.input}
-          >
-            <Picker.Item label="Sélectionner un médicament" value={null} />
-            {listeMedicaments.map((m) => (
-              <Picker.Item key={m._id} label={m.nom} value={m._id} />
-            ))}
-          </Picker>
-
-          <Text style={styles.label}>Médicaments sélectionnés :</Text>
-          {medicaments.map((med) => {
-            const id = med._id || med;
-            const nom = med.nom || listeMedicaments.find((m) => m._id === id)?.nom || `ID inconnu (${id})`;
-
-            return (
-              <View key={id} style={styles.selectedMedicament}>
-                <Text style={styles.selectedText}>{nom}</Text>
-                <Text
-                  style={styles.removeButton}
-                  onPress={() => setMedicaments((prev) => prev.filter((m) => (m._id || m) !== id))}
-                >
-                  ❌
-                </Text>
-              </View>
-            );
-          })}
-        </>
-      )}
 
       <Button title="Enregistrer les modifications" onPress={handleUpdate} />
     </View>

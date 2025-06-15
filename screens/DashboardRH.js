@@ -75,7 +75,16 @@ export default function DashboardRH({ navigation }) {
               <Text>Âge : {item.age}</Text>
               <Text>Poids : {item.poids} kg</Text>
               <Text>Taille : {item.taille} cm</Text>
-              <Text>Traitement : {item.traitementEnCours}</Text>
+              <Text style={{ fontWeight: 'bold' }}>Médicaments :</Text>
+              {item.medicaments && item.medicaments.length > 0 ? (
+                item.medicaments.map((med) => (
+                  <Text key={med._id || med} style={{ marginLeft: 10 }}>
+                    • {med.nom || 'Inconnu'}
+                  </Text>
+                ))
+              ) : (
+                <Text style={{ fontStyle: 'italic', marginLeft: 10 }}>Aucun médicament</Text>
+              )}
               <Button
                 title="Modifier"
                 onPress={() => navigation.navigate('ModifierPatient', { patient: item })}

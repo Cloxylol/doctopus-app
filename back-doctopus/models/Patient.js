@@ -6,6 +6,7 @@ const patientSchema = new mongoose.Schema({
     age: Number,
     poids: Number,
     taille: Number,
+    email: { type: String, required: true },
     medicaments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Medicament' }]
 });
 

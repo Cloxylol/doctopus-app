@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const medicamentSchema = new mongoose.Schema({
     nom: String,
     posologie: String,
-    descriptions: String,
+    description: String,
     photoBase64: String 
 });
 

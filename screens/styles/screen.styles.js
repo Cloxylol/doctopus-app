@@ -5,7 +5,7 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: '#E6E6E6',
         alignItems: 'center',
-        paddingTop: 40,
+        paddingTop: 20,
     },
     header: {
         backgroundColor: '#94D5D0',
