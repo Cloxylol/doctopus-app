@@ -6,8 +6,8 @@ const bcrypt = require('bcryptjs');
 
 
 exports.getMedecins = async (req, res) => {
-    const medecins = await Medecin.find();
-    res.json(medecins);
+  const medecins = await Medecin.find();
+  res.json(medecins);
 };
 
 exports.createMedecin = async (req, res) => {
@@ -54,42 +54,47 @@ exports.createMedecin = async (req, res) => {
 };
 
 exports.addPatientToMedecin = async (req, res) => {
-    try {
-        const medecin = await Medecin.findById(req.params.id);
-        if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+  try {
+    const medecin = await Medecin.findById(req.params.id);
+    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
 
-        const patient = new Patient(req.body);
-        await patient.save();
+    const patient = new Patient(req.body);
+    await patient.save();
 
-        medecin.patients.push(patient._id);
-        await medecin.save();
+    medecin.patients.push(patient._id);
+    await medecin.save();
 
-        res.status(201).json({ message: 'Patient ajouté au médecin', patient });
-    } catch (err) {
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+    res.status(201).json({ message: 'Patient ajouté au médecin', patient });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 };
 
 exports.getMedecinById = async (req, res) => {
-    const medecin = await Medecin.findById(req.params.id).populate('patients');
-    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
-    res.json(medecin);
+  const medecin = await Medecin.findById(req.params.id).populate('patients');
+  if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+  res.json(medecin);
 };
 
 exports.updateMedecin = async (req, res) => {
-    const medecin = await Medecin.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
-    res.json({ message: 'Médecin mis à jour', medecin });
+  const medecin = await Medecin.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+  res.json({ message: 'Médecin mis à jour', medecin });
 };
 
 exports.deleteMedecin = async (req, res) => {
-    const medecin = await Medecin.findByIdAndDelete(req.params.id);
-    if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
-    res.json({ message: 'Médecin supprimé' });
+  const medecin = await Medecin.findByIdAndDelete(req.params.id);
+  if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
+  res.json({ message: 'Médecin supprimé' });
 };
 
-exports.getMedecinByUserId = async (req, res) => {
+exports.getPatientsByUserId = async (req, res) => {
   try {
+    if (req.user.role === 'ADMIN') {
+      const patients = await Patient.find().populate('medicaments');
+      return res.json({ patients });
+    }
+
     const medecin = await Medecin.findOne({ user: req.user.id })
       .populate({
         path: 'patients',
@@ -98,9 +103,9 @@ exports.getMedecinByUserId = async (req, res) => {
 
     if (!medecin) return res.status(404).json({ error: 'Médecin non trouvé' });
 
-    res.json(medecin);
+    res.json({ patients: medecin.patients });
   } catch (err) {
-    console.error('Erreur récupération médecin :', err);
+    console.error('Erreur récupération patients :', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
