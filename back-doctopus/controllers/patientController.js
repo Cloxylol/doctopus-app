@@ -96,10 +96,12 @@ exports.updatePatient = async (req, res) => {
     ).populate('medicaments');
     
     if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
-
+    console.log(userRole, patient.email)
     // Envoi d'email
     if (userRole !== 'RH' && patient.email) {
       const medList = patient.medicaments.map(m => `• ${m.nom}`).join('<br>');
+      console.log(medList);
+
       await sendEmail(
         patient.email,
         'Changement de traitement',
