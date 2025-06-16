@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { API_URL } from '../config';
-
+import styles from './styles/screen.styles';
 
 export default function ModifierRhForm({ route, navigation }) {
   const { rh } = route.params;
@@ -39,28 +39,34 @@ export default function ModifierRhForm({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modifier un RH</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-      />
-      <TextInput
-        style={styles.input}
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-        placeholder="Nouveau mot de passe (facultatif)"
-        secureTextEntry
-      />
-      <Button title="Enregistrer les modifications" onPress={handleUpdate} />
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Formulaire - RH</Text>
+      </View>
+
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nouveau mot de passe (facultatif)"
+          secureTextEntry
+          value={motDePasse}
+          onChangeText={setMotDePasse}
+        />
+
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleUpdate}>
+          <Text style={styles.crudAddButtonText}>Enregistrer</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 15, borderRadius: 6 }
-});

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, Alert, TextInput, TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { useFocusEffect } from '@react-navigation/native';
+import styles from './styles/screen.styles';
 
 export default function DashboardAdminMedecin({ navigation }) {
   const [medecins, setMedecins] = useState([]);
@@ -60,8 +61,11 @@ export default function DashboardAdminMedecin({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestion des Médecins</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doc-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Gestion des Médecins</Text>
+      </View>
 
       <TextInput
         style={styles.searchBar}
@@ -71,38 +75,47 @@ export default function DashboardAdminMedecin({ navigation }) {
       />
 
       {loading ? (
-        <Text>Chargement...</Text>
+        <Text style={{ marginTop: 10 }}>Chargement...</Text>
       ) : (
         <FlatList
           data={filteredMedecins}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.nom}>{item.nom} ({item.specialite})</Text>
-              <Text style={styles.email}>{item.email}</Text>
-              <Button title="Modifier" onPress={() => navigation.navigate('MedicamentForm', { medecin: item })} />
-              <Button title="Supprimer" onPress={() => deleteMedecin(item._id)} />
+            <View style={styles.crudCard}>
+              <Text style={styles.crudTitle}>{item.nom} ({item.specialite})</Text>
+              <Text style={styles.crudSubtext}>{item.email}</Text>
+
+              <View style={styles.crudActions}>
+                <TouchableOpacity
+                  style={styles.crudButton}
+                  onPress={() => navigation.navigate('ModifierMedecin', { medecin: item })}
+                >
+                  <Text style={styles.crudButtonText}>Modifier</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.crudButton}
+                  onPress={() =>
+                    Alert.alert('Confirmation', 'Supprimer ce médecin ?', [
+                      { text: 'Annuler' },
+                      { text: 'Confirmer', onPress: () => deleteMedecin(item._id) }
+                    ])
+                  }
+                >
+                  <Text style={styles.crudButtonText}>Supprimer</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
       )}
 
-      <Button title="Ajouter un médecin" onPress={() => navigation.navigate('AjouterMedecin')} />
+      <TouchableOpacity
+        style={styles.crudAddButton}
+        onPress={() => navigation.navigate('AjouterMedecin')}
+      >
+        <Text style={styles.crudAddButtonText}>Ajouter un médecin</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10
-  },
-  card: { marginBottom: 15, padding: 10, backgroundColor: '#eee', borderRadius: 6 },
-  nom: { fontWeight: 'bold' },
-  email: { fontStyle: 'italic', color: '#444' },
-});

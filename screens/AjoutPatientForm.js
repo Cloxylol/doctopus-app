@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, Alert, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { API_URL } from '../config';
+import DropDownPicker from 'react-native-dropdown-picker';
+import styles from './styles/screen.styles';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 export default function AjoutPatientForm({ navigation }) {
   const [nom, setNom] = useState('');
@@ -10,57 +12,50 @@ export default function AjoutPatientForm({ navigation }) {
   const [age, setAge] = useState('');
   const [poids, setPoids] = useState('');
   const [taille, setTaille] = useState('');
-  const [medecinId, setMedecinId] = useState('');
   const [email, setEmail] = useState('');
-  const [medicaments, setMedicaments] = useState([]);
-  const [selectedMedicaments, setSelectedMedicaments] = useState([]);
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([]);
+
   const [medecins, setMedecins] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
+        const res = await fetch(`${API_URL}/medecins`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        setMedecins(data);
 
-        const [medecinsRes, medicamentsRes] = await Promise.all([
-          fetch(`${API_URL}/medecins`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`${API_URL}/medicaments`, { headers: { Authorization: `Bearer ${token}` } })
-        ]);
-
-        const medecinsData = await medecinsRes.json();
-        const medicamentsData = await medicamentsRes.json();
-
-        setMedecins(medecinsData);
-        setMedicaments(medicamentsData);
+        const formatted = data.map((m) => ({
+          label: `${m.nom} (${m.specialite})`,
+          value: m._id
+        }));
+        setItems(formatted);
       } catch (err) {
-        console.error('Erreur de chargement :', err);
-        Alert.alert('Erreur', 'Impossible de charger les données');
+        console.error('Erreur chargement médecins :', err);
+        Alert.alert('Erreur', 'Impossible de charger les médecins');
       }
     };
 
     fetchData();
   }, []);
 
-  const toggleMedicament = (id) => {
-    setSelectedMedicaments((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    );
-  };
-
   const handleSubmit = async () => {
-    if (!nom || !prenom || !age || !poids || !taille || !medecinId || !email) {
+    if (!nom || !prenom || !age || !poids || !taille || !email || !value) {
       return Alert.alert('Erreur', 'Veuillez remplir tous les champs requis');
     }
 
     try {
-      console.log('Données soumises :', {
-        nom,email, prenom, age, poids, taille, medicaments: selectedMedicaments, medecinId
-      });
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${API_URL}/patients`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           nom,
@@ -69,8 +64,7 @@ export default function AjoutPatientForm({ navigation }) {
           age: parseInt(age),
           poids: parseFloat(poids),
           taille: parseFloat(taille),
-          medicaments: selectedMedicaments,
-          medecinId, 
+          medecinId: value
         })
       });
 
@@ -88,48 +82,41 @@ export default function AjoutPatientForm({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Ajouter un Patient</Text>
+  <View style={styles.crudContainer}>
+    <View style={styles.header}>
+      <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+      <Text style={styles.headerText}>Formulaire - Patient</Text>
+    </View>
 
+    <KeyboardAvoidingView
+      style={styles.formContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <TextInput style={styles.input} placeholder="Nom" value={nom} onChangeText={setNom} />
       <TextInput style={styles.input} placeholder="Prénom" value={prenom} onChangeText={setPrenom} />
       <TextInput style={styles.input} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
       <TextInput style={styles.input} placeholder="Poids (kg)" value={poids} onChangeText={setPoids} keyboardType="numeric" />
       <TextInput style={styles.input} placeholder="Taille (cm)" value={taille} onChangeText={setTaille} keyboardType="numeric" />
-      <TextInput style={styles.input}  placeholder="Email" value={email} onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} />
 
       <Text style={styles.label}>Médecin référent :</Text>
-      <Picker selectedValue={medecinId} onValueChange={setMedecinId} style={styles.input}>
-        <Picker.Item label="Sélectionner un médecin" value="" />
-        {medecins.map((m) => (
-          <Picker.Item key={m._id} label={`${m.nom} (${m.specialite})`} value={m._id} />
-        ))}
-      </Picker>
+      <DropDownPicker
+        open={open}
+        value={value}
+        items={items}
+        setOpen={setOpen}
+        setValue={setValue}
+        setItems={setItems}
+        placeholder="Sélectionner un médecin"
+        style={styles.dropdown}
+        dropDownContainerStyle={{ borderColor: '#ccc' }}
+        zIndex={1000}
+      />
 
-      <Text style={styles.label}>Médicaments :</Text>
-      {medicaments.map((medoc) => (
-        <View key={medoc._id} style={styles.checkboxContainer}>
-          <Text
-            style={{
-              flex: 1,
-              color: selectedMedicaments.includes(medoc._id) ? 'green' : 'black'
-            }}
-            onPress={() => toggleMedicament(medoc._id)}
-          >
-            {medoc.nom}
-          </Text>
-        </View>
-      ))}
-
-      <Button title="Ajouter" onPress={handleSubmit} />
-    </ScrollView>
-  );
+      <TouchableOpacity style={styles.crudAddButton} onPress={handleSubmit}>
+        <Text style={styles.crudAddButtonText}>Ajouter</Text>
+      </TouchableOpacity>
+    </KeyboardAvoidingView>
+  </View>
+);
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 40 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 6 },
-  label: { fontWeight: 'bold', marginVertical: 10 },
-  checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 }
-});

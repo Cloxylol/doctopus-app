@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { API_URL } from '../config';
+import styles from './styles/screen.styles';
 
 export default function AjoutMedecinForm({ navigation }) {
   const [nom, setNom] = useState('');
@@ -39,42 +40,47 @@ export default function AjoutMedecinForm({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ajouter un Médecin</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doctopus-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Formulaire - Médecin</Text>
+      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nom"
-        value={nom}
-        onChangeText={setNom}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Spécialité"
-        value={specialite}
-        onChangeText={setSpecialite}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Mot de passe"
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-        secureTextEntry
-      />
-      <Button title="Enregistrer" onPress={handleSubmit} />
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Nom"
+          value={nom}
+          onChangeText={setNom}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Spécialité"
+          value={specialite}
+          onChangeText={setSpecialite}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Mot de passe"
+          value={motDePasse}
+          onChangeText={setMotDePasse}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleSubmit}>
+          <Text style={styles.crudAddButtonText}>Ajouter</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 15, borderRadius: 6 }
-});

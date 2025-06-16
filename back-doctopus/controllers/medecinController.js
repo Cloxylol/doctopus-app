@@ -95,7 +95,8 @@ exports.getPatientsByUserId = async (req, res) => {
       return res.json({ patients });
     }
 
-    const medecin = await Medecin.findOne({ user: req.user.id })
+
+    const medecin = await Medecin.findOne({ user: req.user.userId })
       .populate({
         path: 'patients',
         populate: { path: 'medicaments' }
@@ -109,3 +110,4 @@ exports.getPatientsByUserId = async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 };
+

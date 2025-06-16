@@ -104,7 +104,7 @@ export default function ModalModifierTraitement({
                         style={[styles.button, styles.addButton]}
                         onPress={() => {
                             onClose();
-                            navigation.navigate('AjoutMedicament');
+                            navigation.navigate('MedicamentForm');
                         }}
                     >
                         <Text style={styles.buttonText}>➕ Ajouter un médicament</Text>
