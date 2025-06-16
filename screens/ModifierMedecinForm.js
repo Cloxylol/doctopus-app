@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { API_URL } from '../config';
-
+import styles from './styles/screen.styles';
 
 export default function ModifierMedecinForm({ route, navigation }) {
   const { medecin } = route.params;
@@ -36,20 +36,39 @@ export default function ModifierMedecinForm({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modifier Médecin</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doctopus-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Formulaire - Médecin</Text>
+      </View>
 
-      <TextInput style={styles.input} value={nom} onChangeText={setNom} placeholder="Nom" />
-      <TextInput style={styles.input} value={specialite} onChangeText={setSpecialite} placeholder="Spécialité" />
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" />
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Nom"
+          value={nom}
+          onChangeText={setNom}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Spécialité"
+          value={specialite}
+          onChangeText={setSpecialite}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+        />
 
-      <Button title="Enregistrer les modifications" onPress={handleUpdate} />
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleUpdate}>
+          <Text style={styles.crudAddButtonText}>Enregistrer</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 15, borderRadius: 6 }
-});

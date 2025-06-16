@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, Alert, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  Image
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
 import { useIsFocused } from '@react-navigation/native';
 import ModalModifierTraitement from './ModalModifierTraitement';
-
+import styles from './styles/screen.styles';
 
 export default function MesPatientsScreen({ navigation }) {
   const [patients, setPatients] = useState([]);
@@ -14,8 +22,6 @@ export default function MesPatientsScreen({ navigation }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-
-
   useEffect(() => {
     if (isFocused) fetchPatients();
   }, [isFocused]);
@@ -23,13 +29,22 @@ export default function MesPatientsScreen({ navigation }) {
   const fetchPatients = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
+      console.log('Bearer Token récupéré :', token);
+
       const res = await fetch(`${API_URL}/medecins/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       const data = await res.json();
-      if (data.patients) setPatients(data.patients);
-      else setPatients([]);
+      console.log('DATA REÇUE DE /medecins/me :', data);
+
+      if (data.patients && Array.isArray(data.patients)) {
+        setPatients(data.patients);
+      } else {
+        setPatients([]);
+      }
     } catch (error) {
       console.error('Erreur chargement patients médecin :', error);
       Alert.alert('Erreur', 'Impossible de charger les patients');
@@ -41,39 +56,50 @@ export default function MesPatientsScreen({ navigation }) {
   );
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.nom}>{item.nom} {item.prenom}</Text>
-      <Text>Âge : {item.age} ans</Text>
-      <Text>Poids : {item.poids} kg</Text>
-      <Text>Taille : {item.taille} cm</Text>
+    <View style={styles.crudCard}>
+      <Text style={styles.crudTitle}>{item.nom} {item.prenom}</Text>
+      <Text style={styles.crudSubtext}>Âge : {item.age} ans</Text>
+      <Text style={styles.crudSubtext}>Poids : {item.poids} kg</Text>
+      <Text style={styles.crudSubtext}>Taille : {item.taille} cm</Text>
 
-      <Text style={{ fontWeight: 'bold', marginTop: 6 }}>Médicament :</Text>
+      <Text style={[styles.crudSubtext, { fontWeight: 'bold', marginTop: 6 }]}>Médicaments :</Text>
       {item.medicaments && item.medicaments.length > 0 ? (
         item.medicaments.map((med) => (
-          <Text key={med._id || med} style={{ marginLeft: 10 }}>
+          <Text key={med._id || med} style={[styles.crudSubtext, { marginLeft: 10 }]}>
             • {med.nom || 'Médicament inconnu'}
           </Text>
         ))
       ) : (
-        <Text style={{ marginLeft: 10, fontStyle: 'italic' }}>Aucun médicament</Text>
+        <Text style={[styles.crudSubtext, { marginLeft: 10, fontStyle: 'italic' }]}>Aucun médicament</Text>
       )}
 
-      <View style={styles.actions}>
-        <Button
-          title="Modifier traitement"
+      <View style={styles.crudActions}>
+        <TouchableOpacity
+          style={styles.crudButton}
           onPress={() => {
             setSelectedPatient(item);
             setModalVisible(true);
           }}
-        />
-        <Button title="Prendre RDV" onPress={() => navigation.navigate('AjoutRdv', { patient: item })} />
+        >
+          <Text style={styles.crudButtonText}>Modifier traitement</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.crudButton}
+          onPress={() => navigation.navigate('AjoutRdv', { patient: item })}
+        >
+          <Text style={styles.crudButtonText}>Prendre RDV</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mes Patients</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doctopus-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Mes Patients</Text>
+      </View>
 
       <TextInput
         style={styles.searchBar}
@@ -82,9 +108,15 @@ export default function MesPatientsScreen({ navigation }) {
         onChangeText={setSearchQuery}
       />
 
+      {filteredPatients.length === 0 && (
+        <Text style={{ textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>
+          Aucun patient trouvé.
+        </Text>
+      )}
+
       <FlatList
         data={filteredPatients}
-        key={refreshKey} 
+        key={refreshKey}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
       />
@@ -96,26 +128,10 @@ export default function MesPatientsScreen({ navigation }) {
         navigation={navigation}
         onTraitementModifie={() => {
           fetchPatients();
-          setRefreshKey(prev => prev + 1);
+          setRefreshKey((prev) => prev + 1);
           setModalVisible(false);
         }}
       />
-
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
-  card: { padding: 15, backgroundColor: '#eee', borderRadius: 8, marginBottom: 10 },
-  nom: { fontWeight: 'bold', fontSize: 16 },
-  actions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10
-  }
-});

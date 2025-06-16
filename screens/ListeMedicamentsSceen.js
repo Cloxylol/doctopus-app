@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, Button, Alert, Image, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, Alert, Image, TextInput, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
+import styles from './styles/screen.styles';
 
 export default function ListeMedicamentsScreen({ navigation }) {
   const [medicaments, setMedicaments] = useState([]);
@@ -56,8 +57,11 @@ export default function ListeMedicamentsScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Liste des Médicaments</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doc-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Liste des Médicaments</Text>
+      </View>
 
       <TextInput
         style={styles.searchBar}
@@ -70,44 +74,43 @@ export default function ListeMedicamentsScreen({ navigation }) {
         data={filteredMedicaments}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.nom}>{item.nom}</Text>
-            <Text style={styles.desc}>{item.description}</Text>
+          <View style={styles.crudCard}>
+            <Text style={styles.crudTitle}>{item.nom}</Text>
+            <Text style={styles.crudSubtext}>{item.description}</Text>
+
             {item.photoBase64 && (
               <Image
                 source={{ uri: item.photoBase64 }}
-                style={{ width: 100, height: 100 }}
-                resizeMode="contain"
+                style={{ width: '100%', height: 150, marginTop: 10, borderRadius: 8 }}
+                resizeMode="cover"
               />
             )}
-            <Button
-              title="Modifier"
-              onPress={() => navigation.navigate('MedicamentForm', { medicament: item })}
-            />
-            <Button
-              title="Supprimer"
-              onPress={() => deleteMedicament(item._id)}
-            />
+
+            <View style={styles.crudActions}>
+              <TouchableOpacity
+                style={styles.crudButton}
+                onPress={() => navigation.navigate('MedicamentForm', { medicament: item })}
+              >
+                <Text style={styles.crudButtonText}>Modifier</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.crudButton}
+                onPress={() => deleteMedicament(item._id)}
+              >
+                <Text style={styles.crudButtonText}>Supprimer</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
 
-      <Button title="Ajouter un médicament" onPress={() => navigation.navigate('MedicamentForm')} />
+      <TouchableOpacity
+        style={styles.crudAddButton}
+        onPress={() => navigation.navigate('MedicamentForm')}
+      >
+        <Text style={styles.crudAddButtonText}>Ajouter un médicament</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10
-  },
-  card: { marginBottom: 15, padding: 10, backgroundColor: '#eee', borderRadius: 6 },
-  nom: { fontWeight: 'bold' },
-  desc: { fontStyle: 'italic', color: '#444' },
-});

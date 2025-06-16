@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Alert, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Alert,
+  Image,
+  TouchableOpacity,
+  Platform,
+  KeyboardAvoidingView,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addEventToCalendar } from '../utils/calendarUtils';
+import styles from './styles/screen.styles';
 
 export default function AjoutRdvScreen({ route, navigation }) {
   const { patient } = route.params;
 
   const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
 
   const handleChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShowPicker(false);
-    setDate(currentDate);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
   };
 
   const handleConfirm = async () => {
     try {
-      const endDate = new Date(date.getTime() + 30 * 60000); // +30 min
+      const endDate = new Date(date.getTime() + 30 * 60000);
       const title = `Rendez-vous patient ${patient.nom} ${patient.prenom}`;
       const description = `Consultation prévue avec ${patient.nom} ${patient.prenom}`;
 
@@ -31,31 +39,34 @@ export default function AjoutRdvScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Planifier un Rendez-vous</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/doctopus-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Rendez-vous</Text>
+      </View>
 
-      <Button title="Choisir une date et heure" onPress={() => setShowPicker(true)} />
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Text style={styles.label}>Date et heure :</Text>
+        <Text style={{ fontSize: 16, marginBottom: 20 }}>
+          {date.toLocaleDateString()} à {date.toLocaleTimeString()}
+        </Text>
 
-      <Text style={styles.date}>
-        {date.toLocaleDateString()} à {date.toLocaleTimeString()}
-      </Text>
-
-      {showPicker && (
         <DateTimePicker
           value={date}
           mode="datetime"
-          display="default"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          minimumDate={new Date()}
           onChange={handleChange}
+          style={{ marginBottom: 20 }}
         />
-      )}
 
-      <Button title="Confirmer le Rendez-vous" onPress={handleConfirm} />
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleConfirm}>
+          <Text style={styles.crudAddButtonText}>Confirmer le rendez-vous</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 40 },
-  title: { fontSize: 22, marginBottom: 20 },
-  date: { marginVertical: 20, fontSize: 16 }
-});

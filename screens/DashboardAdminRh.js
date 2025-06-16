@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, Alert, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
+import styles from './styles/screen.styles';
 
 export default function DashboardAdminRh({ navigation }) {
   const [users, setUsers] = useState([]);
@@ -33,7 +34,7 @@ export default function DashboardAdminRh({ navigation }) {
       });
 
       if (response.ok) {
-        fetchRH(); // recharge après suppression
+        fetchRH();
       } else {
         Alert.alert('Erreur', 'Échec de la suppression');
       }
@@ -54,8 +55,11 @@ export default function DashboardAdminRh({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestion des RH</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Gestion des RH</Text>
+      </View>
 
       <TextInput
         style={styles.searchBar}
@@ -68,45 +72,39 @@ export default function DashboardAdminRh({ navigation }) {
         data={filteredUsers}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.email}>{item.email}</Text>
-            <Button
-              title="Modifier"
-              onPress={() => navigation.navigate('ModifierRh', { rh: item })}
-            />
-            <Button
-              title="Supprimer"
-              onPress={() =>
-                Alert.alert('Confirmation', 'Supprimer ce RH ?', [
-                  { text: 'Annuler' },
-                  { text: 'Confirmer', onPress: () => deleteUser(item._id) }
-                ])
-              }
-            />
+          <View style={styles.crudCard}>
+            <Text style={styles.crudTitle}>{item.email}</Text>
+
+            <View style={styles.crudActions}>
+              <TouchableOpacity
+                style={styles.crudButton}
+                onPress={() => navigation.navigate('ModifierRh', { rh: item })}
+              >
+                <Text style={styles.crudButtonText}>Modifier</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.crudButton}
+                onPress={() =>
+                  Alert.alert('Confirmation', 'Supprimer ce RH ?', [
+                    { text: 'Annuler' },
+                    { text: 'Confirmer', onPress: () => deleteUser(item._id) }
+                  ])
+                }
+              >
+                <Text style={styles.crudButtonText}>Supprimer</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
 
-      <Button title="Ajouter un RH" onPress={() => navigation.navigate('AjouterRh')} />
+      <TouchableOpacity
+        style={styles.crudAddButton}
+        onPress={() => navigation.navigate('AjouterRh')}
+      >
+        <Text style={styles.crudAddButtonText}>Ajouter un RH</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10
-  },
-  card: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#eee',
-    borderRadius: 6
-  },
-  email: { fontStyle: 'italic', color: '#444' }
-});

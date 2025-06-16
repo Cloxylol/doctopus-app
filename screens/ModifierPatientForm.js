@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, Alert, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { API_URL } from '../config';
+import styles from './styles/screen.styles';
 
 export default function ModifierPatientForm({ route, navigation }) {
   const { patient } = route.params;
@@ -14,30 +14,19 @@ export default function ModifierPatientForm({ route, navigation }) {
   const [taille, setTaille] = useState(String(patient.taille));
   const [medicaments, setMedicaments] = useState(patient.medicaments || []);
   const [email, setEmail] = useState(patient.email || '');
-  const [listeMedicaments, setListeMedicaments] = useState([]);
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchRole = async () => {
       try {
         const userRaw = await AsyncStorage.getItem('user');
         const user = JSON.parse(userRaw);
         setRole(user?.role);
-
-        if (user?.role === 'MEDECIN') {
-          const token = await AsyncStorage.getItem('token');
-          const res = await fetch(`${API_URL}/medicaments`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = await res.json();
-          setListeMedicaments(data);
-        }
       } catch (err) {
-        console.error('Erreur chargement données :', err);
+        console.error('Erreur récupération rôle :', err);
       }
     };
-
-    fetchData();
+    fetchRole();
   }, []);
 
   const handleUpdate = async () => {
@@ -51,7 +40,8 @@ export default function ModifierPatientForm({ route, navigation }) {
             email,
             age: parseInt(age),
             poids: parseFloat(poids),
-            taille: parseFloat(taille)
+            taille: parseFloat(taille),
+            medicaments: []
           };
 
       const response = await fetch(`${API_URL}/patients/${patient._id}`, {
@@ -85,43 +75,24 @@ export default function ModifierPatientForm({ route, navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modifier un Patient</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Formulaire - Modifier Patient</Text>
+      </View>
 
-        <>
-          <TextInput style={styles.input} value={nom} onChangeText={setNom} placeholder="Nom" />
-          <TextInput style={styles.input} value={prenom} onChangeText={setPrenom} placeholder="Prénom" />
-          <TextInput style={styles.input} value={age} onChangeText={setAge} placeholder="Âge" keyboardType="numeric" />
-          <TextInput style={styles.input} value={poids} onChangeText={setPoids} placeholder="Poids (kg)" keyboardType="numeric" />
-          <TextInput style={styles.input} value={taille} onChangeText={setTaille} placeholder="Taille (cm)" keyboardType="numeric" />
-          <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" />
-        </>
+      <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
+        <TextInput style={styles.input} placeholder="Nom" value={nom} onChangeText={setNom} />
+        <TextInput style={styles.input} placeholder="Prénom" value={prenom} onChangeText={setPrenom} />
+        <TextInput style={styles.input} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
+        <TextInput style={styles.input} placeholder="Poids (kg)" value={poids} onChangeText={setPoids} keyboardType="numeric" />
+        <TextInput style={styles.input} placeholder="Taille (cm)" value={taille} onChangeText={setTaille} keyboardType="numeric" />
+        <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} />
 
-      <Button title="Enregistrer les modifications" onPress={handleUpdate} />
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleUpdate}>
+          <Text style={styles.crudAddButtonText}>Enregistrer les modifications</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 15, borderRadius: 6 },
-  label: { fontWeight: 'bold', marginBottom: 5 },
-  selectedMedicament: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#eee',
-    padding: 8,
-    marginBottom: 6,
-    borderRadius: 6,
-  },
-  selectedText: {
-    flex: 1,
-  },
-  removeButton: {
-    color: 'red',
-    fontSize: 16,
-    marginLeft: 10,
-  },
-});

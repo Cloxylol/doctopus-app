@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { API_URL } from '../config';
-
+import styles from './styles/screen.styles';
 
 export default function AjouterRhForm({ navigation }) {
   const [email, setEmail] = useState('');
@@ -38,28 +38,35 @@ export default function AjouterRhForm({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ajouter un RH</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Mot de passe"
-        secureTextEntry
-        value={motDePasse}
-        onChangeText={setMotDePasse}
-      />
-      <Button title="Enregistrer" onPress={handleSubmit} />
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Formulaire - RH</Text>
+      </View>
+
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Mot de passe"
+          secureTextEntry
+          value={motDePasse}
+          onChangeText={setMotDePasse}
+        />
+
+        <TouchableOpacity style={styles.crudAddButton} onPress={handleSubmit}>
+          <Text style={styles.crudAddButtonText}>Enregistrer</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
-  title: { fontSize: 22, marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 15, borderRadius: 6 }
-});

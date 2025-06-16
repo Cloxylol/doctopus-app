@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, Button, Alert, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, Alert, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
+import styles from './styles/screen.styles';
 
 export default function DashboardRH({ navigation }) {
   const [patients, setPatients] = useState([]);
@@ -53,8 +54,11 @@ export default function DashboardRH({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestion des Patients</Text>
+    <View style={styles.crudContainer}>
+      <View style={styles.header}>
+        <Image source={require('../assets/rh-logo.png')} style={styles.logo} />
+        <Text style={styles.headerText}>Gestion des Patients</Text>
+      </View>
 
       <TextInput
         style={styles.searchBar}
@@ -64,65 +68,62 @@ export default function DashboardRH({ navigation }) {
       />
 
       {loading ? (
-        <Text>Chargement...</Text>
+        <Text style={{ marginTop: 10 }}>Chargement...</Text>
       ) : (
         <FlatList
           data={filteredPatients}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.nom}>{item.nom} {item.prenom}</Text>
-              <Text>Âge : {item.age}</Text>
-              <Text>Poids : {item.poids} kg</Text>
-              <Text>Taille : {item.taille} cm</Text>
-              <Text style={{ fontWeight: 'bold' }}>Médicaments :</Text>
+            <View style={styles.crudCard}>
+              <Text style={styles.crudTitle}>{item.nom} {item.prenom}</Text>
+              <Text style={styles.crudSubtext}>Âge : {item.age}</Text>
+              <Text style={styles.crudSubtext}>Poids : {item.poids} kg</Text>
+              <Text style={styles.crudSubtext}>Taille : {item.taille} cm</Text>
+
+              <Text style={[styles.crudSubtext, { fontWeight: 'bold', marginTop: 6 }]}>Médicaments :</Text>
               {item.medicaments && item.medicaments.length > 0 ? (
                 item.medicaments.map((med) => (
-                  <Text key={med._id || med} style={{ marginLeft: 10 }}>
+                  <Text key={med._id || med} style={[styles.crudSubtext, { marginLeft: 10 }]}>
                     • {med.nom || 'Inconnu'}
                   </Text>
                 ))
               ) : (
-                <Text style={{ fontStyle: 'italic', marginLeft: 10 }}>Aucun médicament</Text>
+                <Text style={[styles.crudSubtext, { marginLeft: 10, fontStyle: 'italic' }]}>
+                  Aucun médicament
+                </Text>
               )}
-              <Button
-                title="Modifier"
-                onPress={() => navigation.navigate('ModifierPatient', { patient: item })}
-              />
-              <Button
-                title="Supprimer"
-                onPress={() =>
-                  Alert.alert('Confirmation', 'Supprimer ce patient ?', [
-                    { text: 'Annuler' },
-                    { text: 'Confirmer', onPress: () => deletePatient(item._id) }
-                  ])
-                }
-              />
+
+              <View style={styles.crudActions}>
+                <TouchableOpacity
+                  style={styles.crudButton}
+                  onPress={() => navigation.navigate('ModifierPatient', { patient: item })}
+                >
+                  <Text style={styles.crudButtonText}>Modifier</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.crudButton}
+                  onPress={() =>
+                    Alert.alert('Confirmation', 'Supprimer ce patient ?', [
+                      { text: 'Annuler' },
+                      { text: 'Confirmer', onPress: () => deletePatient(item._id) }
+                    ])
+                  }
+                >
+                  <Text style={styles.crudButtonText}>Supprimer</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
       )}
 
-      <Button title="Ajouter un patient" onPress={() => navigation.navigate('AjouterPatient')} />
+    <TouchableOpacity
+      style={styles.crudAddButton}
+      onPress={() => navigation.navigate('AjouterPatient')}
+    >
+      <Text style={styles.crudAddButtonText}>Ajouter un patient</Text>
+    </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10
-  },
-  card: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#eee',
-    borderRadius: 6
-  },
-  nom: { fontWeight: 'bold' }
-});
